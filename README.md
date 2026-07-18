@@ -13,8 +13,8 @@
     <a href="https://discord.gg/N3KKFuxdma">
       <img alt="Discord" src="https://img.shields.io/badge/Discord-Gloom-5865F2?style=flat&logo=discord&logoColor=white">
     </a>
-    <a href="https://t.me/mechabeez">
-      <img alt="Telegram" src="https://img.shields.io/badge/Telegram-mechabeez-26A5E4?style=flat&logo=telegram&logoColor=white">
+    <a href="https://t.me/gloomac">
+      <img alt="Telegram" src="https://img.shields.io/badge/Telegram-gloomac-26A5E4?style=flat&logo=telegram&logoColor=white">
     </a>
   </p>
 </div>
