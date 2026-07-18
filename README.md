@@ -91,7 +91,7 @@ gloom.command.use
 ## Сборка из исходников
 
 ```bash
-git clone https://github.com/<owner>/GloomAI.git
+git clone https://github.com/fruzzexx/GloomAI.git
 cd GloomAI
 ./gradlew :GloomAI:shadowJar
 ```
