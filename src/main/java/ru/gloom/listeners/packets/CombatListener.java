@@ -6,6 +6,7 @@ import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientInteractEntity;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import ru.gloom.GloomAI;
 import ru.gloom.player.GloomPlayer;
 
@@ -32,6 +33,10 @@ public final class CombatListener extends PacketListenerAbstract {
 
         Entity target = GloomAI.INSTANCE.getTargetEntityIndex().getByEntityId(interactPacket.getEntityId());
         if (target == null) {
+            return;
+        }
+
+        if (!(target instanceof Player)) {
             return;
         }
 
