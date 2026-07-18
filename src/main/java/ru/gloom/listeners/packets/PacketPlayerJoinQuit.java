@@ -3,7 +3,6 @@ package ru.gloom.listeners.packets;
 import com.github.retrooper.packetevents.event.*;
 import com.github.retrooper.packetevents.protocol.ConnectionState;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
-import com.github.retrooper.packetevents.protocol.player.User;
 import org.bukkit.entity.Player;
 import ru.gloom.GloomAI;
 
@@ -34,8 +33,8 @@ public class PacketPlayerJoinQuit extends PacketListenerAbstract {
     public void onUserLogin(UserLoginEvent event) {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
-        if (player.hasPermission("gloom.command.alerts")
-                && player.hasPermission("gloom.command.alerts.enable-on-join")) {
+        if (player.hasPermission("gloom.command.alert")
+                && player.hasPermission("gloom.command.alert.enable-on-join")) {
 
             if (!GloomAI.INSTANCE.getAlertManager().hasAlertsEnabled(uuid)) {
                 GloomAI.INSTANCE.getAlertManager().setAlertsEnabled(uuid, true, true);
