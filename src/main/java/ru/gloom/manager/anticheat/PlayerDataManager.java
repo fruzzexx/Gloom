@@ -20,15 +20,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PlayerDataManager {
     @Getter
     private final Collection<User> exemptUsers = ConcurrentHashMap.newKeySet();
-    private final ConcurrentHashMap<User, GloomPlayer> playerDataMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, GloomPlayer> playerDataMap = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, TrainData> trainDataMap = new ConcurrentHashMap<>();
 
     @Nullable
     public GloomPlayer getPlayer(@NotNull UUID uuid) {
-        Object channel = PacketEvents.getAPI().getProtocolManager().getChannel(uuid);
-        User user = PacketEvents.getAPI().getProtocolManager().getUser(channel);
-
-        return getPlayer(user);
+        return playerDataMap.get(uuid);
     }
 
     public void loadOnlinePlayers() {
@@ -52,7 +49,7 @@ public class PlayerDataManager {
 
     @Nullable
     public GloomPlayer getPlayer(@NotNull User user) {
-        return playerDataMap.get(user);
+        return playerDataMap.get(user.getUUID());
     }
 
     public TrainData getOrCreateTrainData(UUID uuid, String name) {
@@ -97,11 +94,11 @@ public class PlayerDataManager {
                 .getOrCreatePlayerData(user.getUUID(), user.getName());
 
         GloomPlayer player = new GloomPlayer(user);
-        playerDataMap.put(user, player);
+        playerDataMap.put(user.getUUID(), player);
     }
 
     public GloomPlayer remove(final @NotNull User user) {
-        return playerDataMap.remove(user);
+        return playerDataMap.remove(user.getUUID());
     }
 
     public void onDisconnect(User user) {
