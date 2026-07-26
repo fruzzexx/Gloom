@@ -1,7 +1,7 @@
 namespace ru.gloom.protocol.flatbuffers;
 
 table AnalyzeRequest {
-  name:string (required);
+  name:string (deprecated);
   count:uint;
   features:[float] (required);
 }

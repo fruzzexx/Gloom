@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "ru.gloom"
-version = "1.0.0-RELEASE"
+version = "1.0.2-RELEASE"
 
 repositories {
     exclusiveContent {
@@ -61,7 +61,6 @@ dependencies {
     implementation("io.lettuce:lettuce-core:7.4.0.RELEASE")
 
     implementation(libs.relocations)
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     compileOnly("net.citizensnpcs:citizens-main:2.0.35-SNAPSHOT") {
         exclude(group = "*", module = "*")
     }

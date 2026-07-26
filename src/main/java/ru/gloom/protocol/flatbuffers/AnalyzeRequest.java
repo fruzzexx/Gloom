@@ -132,7 +132,6 @@ public final class AnalyzeRequest extends Table {
 
     public static int endAnalyzeRequest(FlatBufferBuilder builder) {
         int o = builder.endTable();
-        builder.required(o, 4);  // name
         builder.required(o, 8);  // features
         return o;
     }

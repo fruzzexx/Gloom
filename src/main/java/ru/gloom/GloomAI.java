@@ -1,7 +1,6 @@
 package ru.gloom;
 
 import lombok.Getter;
-import okhttp3.OkHttpClient;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandExecutor;
@@ -30,14 +29,14 @@ import ru.gloom.manager.analytic.MonitorManager;
 import ru.gloom.manager.anticheat.PlayerDataManager;
 import ru.gloom.manager.analytic.hologram.HologramManager;
 import ru.gloom.service.PlayerOnlineService;
-import ru.gloom.service.analyze.JsonAnalyzeService;
+import ru.gloom.service.analyze.AnalyzeBatchDispatcher;
+import ru.gloom.service.analyze.FlatBufferAnalyzeService;
 import ru.gloom.utils.VersionHelper;
 import ru.gloom.utils.entity.TargetEntityAdapter;
 import ru.gloom.utils.entity.TargetEntityIndex;
 import ru.gloom.utils.entity.TargetEntityIndexListener;
 
 import java.lang.reflect.Constructor;
-import java.util.concurrent.TimeUnit;
 
 @Getter
 public class GloomAI extends JavaPlugin {
@@ -62,7 +61,7 @@ public class GloomAI extends JavaPlugin {
     private HologramManager hologramManager;
     private MonitorManager monitorManager;
 
-    private OkHttpClient httpClient;
+    private AnalyzeBatchDispatcher analyzeBatchDispatcher;
     private CommandManager commandManager;
 
     private TargetEntityIndex targetEntityIndex;
@@ -74,12 +73,6 @@ public class GloomAI extends JavaPlugin {
     @Override
     public void onEnable() {
         INSTANCE = this;
-
-        this.httpClient = new OkHttpClient.Builder()
-                .connectTimeout(5, TimeUnit.SECONDS)
-                .readTimeout(5, TimeUnit.SECONDS)
-                .writeTimeout(5, TimeUnit.SECONDS)
-                .build();
 
         this.packetManager = new PacketManager();
         packetManager.register();
@@ -99,7 +92,9 @@ public class GloomAI extends JavaPlugin {
         initRedis();
 
         this.aiResultManager = new AIResultManager();
-        this.analyzeService = new JsonAnalyzeService(this, checksConfigManager);
+        this.analyzeBatchDispatcher = new AnalyzeBatchDispatcher(this, checksConfigManager);
+        this.analyzeBatchDispatcher.start();
+        this.analyzeService = new FlatBufferAnalyzeService(checksConfigManager, analyzeBatchDispatcher);
         this.alertManager = new AlertManager(mainConfigManager);
         this.violationManager = new ViolationManager();
 
@@ -140,14 +135,17 @@ public class GloomAI extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (packetManager != null) {
+            packetManager.unregister();
+        }
+        if (analyzeBatchDispatcher != null) {
+            analyzeBatchDispatcher.stop();
+        }
         if (violationManager != null) {
             violationManager.shutdown();
         }
         if (hologramManager != null) {
             hologramManager.stop();
-        }
-        if (packetManager != null) {
-            packetManager.unregister();
         }
         if (monitorManager != null) {
             monitorManager.shutdown();
