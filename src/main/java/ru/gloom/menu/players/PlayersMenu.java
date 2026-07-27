@@ -131,9 +131,11 @@ public class PlayersMenu extends ActionMenu {
                 return new ArrayList<>();
             }
 
+            int checksLimit = playersMenuSettings.getChecksLimit();
             playersData = new ArrayList<>(playersData);
             playersData.sort(Comparator
-                    .comparingDouble(PlayerAIProbabilityData::getAverageProbability)
+                    .comparingDouble((PlayerAIProbabilityData data) ->
+                            PlayersMenuPlaceholders.averageProbability(data, checksLimit))
                     .reversed());
             return playersData;
         } catch (CompletionException exception) {

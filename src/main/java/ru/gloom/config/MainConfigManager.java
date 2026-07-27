@@ -38,6 +38,8 @@ public class MainConfigManager extends ConfigManager {
 
     private String historyHeaderMessage;
     private String historyEntryMessage;
+    private String historyOnlyPlayerMessage;
+    private String historyNoDataMessage;
 
     private String reloadingMessage;
     private String reloadedMessage;
@@ -117,6 +119,8 @@ public class MainConfigManager extends ConfigManager {
 
         historyHeaderMessage = messagesConfig.getString("history-header", "{prefix} &fИстория проверок игрока &c{player} &7({page}&8/&7{max_pages})").replace("{prefix}", prefix);
         historyEntryMessage = messagesConfig.getString("history-entry", "{prefix} &8[&b{server}&8] &fПровалил &b{check_name} &f(x&c{vl}&f) &7{verbose} (&b{time_ago} назад&7)").replace("{prefix}", prefix);
+        historyOnlyPlayerMessage = messagesConfig.getString("history-only-player", "{prefix} &#F3F3F3Меню истории может открыть только игрок.").replace("{prefix}", prefix);
+        historyNoDataMessage = messagesConfig.getString("history-no-data", "{prefix} &#F3F3F3Нет данных истории для игрока &#F65943{player}&#F3F3F3.").replace("{prefix}", prefix);
 
         reloadingMessage = messagesConfig.getString("reloading", "{prefix} &fПерезагрузка конфигурации...").replace("{prefix}", prefix);
         reloadedMessage = messagesConfig.getString("reloaded", "{prefix} &fКонфигурация успешно перезагружена...").replace("{prefix}", prefix);

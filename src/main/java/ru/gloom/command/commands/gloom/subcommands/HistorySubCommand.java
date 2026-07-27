@@ -7,10 +7,14 @@ import org.jetbrains.annotations.NotNull;
 import ru.gloom.GloomAI;
 import ru.gloom.api.command.BuildableCommand;
 import ru.gloom.api.command.register.SubCommandRegister;
+import ru.gloom.database.model.PlayerAIProbabilityData;
 import ru.gloom.database.model.ViolationRecord;
+import ru.gloom.menu.history.HistoryMenu;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @SubCommandRegister(permission = "gloom.command.history", aliases = "history")
@@ -23,6 +27,12 @@ public class HistorySubCommand implements BuildableCommand {
         }
 
         String targetName = args[1];
+
+        if (isMenuRequested(args)) {
+            openHistoryMenu(sender, targetName);
+            return;
+        }
+
         int page = getPage(args);
 
         Player target = Bukkit.getPlayer(targetName);
@@ -57,6 +67,48 @@ public class HistorySubCommand implements BuildableCommand {
                 }
             });
         });
+    }
+
+    private boolean isMenuRequested(@NotNull String @NotNull [] args) {
+        return args.length >= 3 && args[2].equalsIgnoreCase("menu");
+    }
+
+    private void openHistoryMenu(@NotNull CommandSender sender, @NotNull String targetName) {
+        var config = GloomAI.INSTANCE.getMainConfigManager();
+
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(config.getHistoryOnlyPlayerMessage());
+            return;
+        }
+
+        var probabilityStorage = GloomAI.INSTANCE.getViolationManager().getProbabilityStorage();
+        Player target = Bukkit.getPlayer(targetName);
+
+        CompletableFuture<PlayerAIProbabilityData> dataFuture = target != null
+                ? probabilityStorage.getPlayerDataByUUID(target.getUniqueId())
+                : probabilityStorage.getPlayerDataByName(targetName);
+
+        dataFuture.whenComplete((playerData, throwable) -> Bukkit.getScheduler().runTask(
+                GloomAI.INSTANCE,
+                () -> {
+                    if (!player.isOnline()) {
+                        return;
+                    }
+
+                    if (throwable != null) {
+                        Bukkit.getLogger().severe(String.format("Не удалось загрузить историю игрока %s", targetName));
+                    }
+
+                    if (playerData == null) {
+                        player.sendMessage(
+                                config.getHistoryNoDataMessage().replace("{player}", targetName)
+                        );
+                        return;
+                    }
+
+                    new HistoryMenu(playerData).show(player);
+                }
+        ));
     }
 
     private int getPage(@NotNull String @NotNull [] args) {
@@ -104,7 +156,9 @@ public class HistorySubCommand implements BuildableCommand {
                     .filter(name -> name.toLowerCase().startsWith(args[1].toLowerCase()))
                     .toList();
         }
-
-        return List.of();
+        if (args.length == 3) {
+            return List.of("menu");
+        }
+        return Collections.emptyList();
     }
 }

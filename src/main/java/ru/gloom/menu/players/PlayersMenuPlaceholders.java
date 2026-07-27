@@ -64,10 +64,13 @@ public class PlayersMenuPlaceholders {
         String playerName = getPlayerName(playerData);
         UUID playerUuid = getPlayerUuid(playerData);
         List<Double> probabilities = safeProbabilities(playerData);
-        double lastChance = probabilities.isEmpty() ? 0.0D : probabilities.get(probabilities.size() - 1);
-        double avgChance = playerData == null ? 0.0D : playerData.getAverageProbability();
-        double maxChance = probabilities.stream().mapToDouble(Double::doubleValue).max().orElse(0.0D);
-        double minChance = probabilities.stream().mapToDouble(Double::doubleValue).min().orElse(0.0D);
+        List<Double> shownProbabilities = lastProbabilities(probabilities, settings.getChecksLimit());
+        double lastChance = shownProbabilities.isEmpty()
+                ? 0.0D
+                : shownProbabilities.get(shownProbabilities.size() - 1);
+        double avgChance = average(shownProbabilities);
+        double maxChance = shownProbabilities.stream().mapToDouble(Double::doubleValue).max().orElse(0.0D);
+        double minChance = shownProbabilities.stream().mapToDouble(Double::doubleValue).min().orElse(0.0D);
 
         placeholders.put("player", playerName);
         placeholders.put("player_name", playerName);
@@ -83,9 +86,10 @@ public class PlayersMenuPlaceholders {
         placeholders.put("min_probability", GloomAI.INSTANCE.getMainConfigManager().getChanceString(minChance));
 
         placeholders.put("probability_count", String.valueOf(probabilities.size()));
+        placeholders.put("checks_count", String.valueOf(shownProbabilities.size()));
 
         placeholders.put("cheat_bar", formatCompactBar(avgChance, settings));
-        placeholders.put("checks", String.join("\n", formatLastChecks(probabilities, settings)));
+        placeholders.put("checks", String.join("\n", formatLastChecks(shownProbabilities, settings)));
 
 
         long lastCheckTime = System.currentTimeMillis() - Optional.ofNullable(playerData)
@@ -108,6 +112,26 @@ public class PlayersMenuPlaceholders {
         }
 
         return playerData.getProbabilities();
+    }
+
+    public static List<Double> lastProbabilities(List<Double> probabilities, int limit) {
+        if (probabilities == null || probabilities.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        int from = limit <= 0 ? 0 : Math.max(0, probabilities.size() - limit);
+        return new ArrayList<>(probabilities.subList(from, probabilities.size()));
+    }
+
+    public static double averageProbability(PlayerAIProbabilityData playerData, int limit) {
+        return average(lastProbabilities(safeProbabilities(playerData), limit));
+    }
+
+    private static double average(List<Double> probabilities) {
+        return probabilities.stream()
+                .mapToDouble(Double::doubleValue)
+                .average()
+                .orElse(0.0D);
     }
 
     public static String getPlayerName(PlayerAIProbabilityData playerData) {
@@ -148,14 +172,12 @@ public class PlayersMenuPlaceholders {
                 + settings.getEmptyBarSymbol().repeat(10 - count);
     }
 
-    private static List<String> formatLastChecks(List<Double> probabilities, PlayersMenuSettings settings) {
-        if (probabilities == null || probabilities.isEmpty()) {
+    private static List<String> formatLastChecks(List<Double> shownProbabilities, PlayersMenuSettings settings) {
+        if (shownProbabilities == null || shownProbabilities.isEmpty()) {
             return List.of(settings.getNoChecksMessage());
         }
 
-        int limit = settings.getChecksLimit();
-        int from = Math.max(0, probabilities.size() - limit);
-        List<Double> lastProbabilities = new ArrayList<>(probabilities.subList(from, probabilities.size()));
+        List<Double> lastProbabilities = new ArrayList<>(shownProbabilities);
         Collections.reverse(lastProbabilities);
 
         List<String> lines = new ArrayList<>();

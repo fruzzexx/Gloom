@@ -152,14 +152,6 @@ public class GloomAI extends JavaPlugin {
         }
     }
 
-    public void registerTargetEntityAdapter(TargetEntityAdapter adapter) {
-        targetEntityIndex.registerAdapter(adapter);
-    }
-
-    public void unregisterTargetEntityAdapter(String key) {
-        targetEntityIndex.unregisterAdapter(key);
-    }
-
 
     public void registerCommand(String commandName, CommandExecutor executor) {
         try {
@@ -181,7 +173,6 @@ public class GloomAI extends JavaPlugin {
         if (VersionHelper.IS_ITEM_LEGACY) {
             return new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) 3);
         }
-
         return new ItemStack(Material.PLAYER_HEAD, 1);
     }
 
